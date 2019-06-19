@@ -1,16 +1,18 @@
 import React from 'react';
 import PropTypes from "prop-types";
-
-const dataSource = [
-  {firstName: "John", lastName: "Doe", active: false},
-  {firstName: "Mary", lastName: "Moe", active: false},
-  {firstName: "Peter", lastName: "Noname", active: true}
-]
+import { connect } from 'react-redux'
+import {filterGrid, toggleActive, lastName} from '../Actions'
 
 class GridRecord extends React.Component {
+  showUserDetails(e){
+    e.preventDefault();
+    this.props.history.push(`/details/${this.props.record.id}`);
+  }
+
   render(){
     let {record} = this.props;
     return <tr>
+      <th onClick={this.showUserDetails.bind(this)}><a href="#">{record.id}</a></th>
       <th>{record.firstName}</th>
       <th><input type="text" onChange={this.props.changeLastName} value={record.lastName}/></th>
       <th><input type="checkbox" checked={record.active} onChange={this.props.toggleActive}/></th>
@@ -30,42 +32,30 @@ GridRecord.propTypes = {
   })
 };
 
-export default class GridComponent extends React.Component {
+class GridComponent extends React.Component {
   constructor() {
     super();
-    this.state = {
-      records:[]
-    }
   }
   componentDidMount() {
     this.refs.filterInput && this.refs.filterInput.focus();
-    this.setState({
-      records:dataSource
-    })
+    // this.setState({
+    //   records:dataSource
+    // })
   }
 
   toggleActive(index){
-    let {records} = this.state;
-    records[index].active = !records[index].active;
-    this.setState({
-      records:records
-    })
+    let {dispatch} = this.props;
+    dispatch(toggleActive(index));
   }
 
   changeLastName(index, e){
-    let {records} = this.state;
-    records[index].lastName = e.target.value;
-    this.setState({
-      records:records
-    })
+    let {dispatch} = this.props;
+    dispatch(lastName(e.target.value, index));
   }
 
   handleFilterChange(e){
-    let value = e.target.value,
-      records = dataSource.filter((record) => record.firstName.toUpperCase().includes(value.toUpperCase()));
-    this.setState({
-      records:records
-    });
+    let {dispatch} = this.props;
+    dispatch(filterGrid(e.target.value));
   }
 
   render(){
@@ -75,6 +65,7 @@ export default class GridComponent extends React.Component {
         <table className="table table-condensed">
           <thead>
           <tr>
+            <th>id</th>
             <th>Firstname</th>
             <th>Lastname</th>
             <th>Email</th>
@@ -82,8 +73,8 @@ export default class GridComponent extends React.Component {
           </thead>
           <tbody>
           {
-            this.state.records.map((record, index)=>{
-              return <GridRecord record={record} key={index} toggleActive={this.toggleActive.bind(this, index)} changeLastName={this.changeLastName.bind(this, index)}/>
+            this.props.records.map((record, index)=>{
+              return <GridRecord record={record} key={index} history={this.props.history} toggleActive={this.toggleActive.bind(this, index)} changeLastName={this.changeLastName.bind(this, index)}/>
             })
           }
           </tbody>
@@ -94,3 +85,17 @@ export default class GridComponent extends React.Component {
     )
   }
 }
+
+GridComponent.propTypes = {
+  records: PropTypes.array.isRequired
+};
+
+function mapStateToProps(state) {
+  return {
+    records: state.grid
+  }
+}
+
+export default connect(
+  mapStateToProps
+)(GridComponent)

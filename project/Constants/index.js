@@ -1,0 +1,7 @@
+//DETAILS PAGE ACTIONS
+export const FILTER_DETAILS = 'FILTER_DETAILS';
+
+//GRID ACTIONS
+export const TOGGLE_ACTIVE = 'TOGGLE_ACTIVE';
+export const FILTER = 'FILTER';
+export const LAST_NAME = 'LAST_NAME';
